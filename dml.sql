@@ -224,6 +224,62 @@ SELECT
 FROM products_to_insert;
 
 
+-- Контакты
+INSERT INTO contacts (phone, email)
+SELECT store_phone, store_email
+FROM mock_data
+UNION
+SELECT supplier_phone, supplier_email
+FROM mock_data;
+
+
+-- Локации
+INSERT INTO locations (
+    address,
+    city,
+    state,
+    country_id
+)
+SELECT
+    md.store_location,
+    md.store_city,
+    md.store_state,
+    c.id as country_id
+FROM mock_data md
+JOIN countries c ON md.store_country = c.name
+UNION
+SELECT
+    md.supplier_address,
+    md.supplier_city,
+    '' as supplier_state,
+    c.id as country_id
+FROM mock_data md
+JOIN countries c ON md.supplier_country = c.name;
+
+
+-- Магазины
+WITH locations_full as (
+    SELECT
+        l.id,
+        l.address,
+        l.city,
+        l.state,
+        c.name as country
+    FROM locations l
+    JOIN countries c ON l.country_id = c.id
+)
+INSERT INTO stores (name, location_id, contacts_id)
+SELECT DISTINCT
+    md.store_name as name,
+    lf.id as location_id,
+    c.id as contacts_id
+FROM mock_data md
+JOIN locations_full lf ON md.store_location = lf.address AND
+                          md.store_city = lf.city AND
+                          md.store_state = lf.state AND
+                          md.store_country = lf.country
+JOIN contacts c ON md.store_phone = c.phone AND
+                   md.store_email = c.email;
 
 
 

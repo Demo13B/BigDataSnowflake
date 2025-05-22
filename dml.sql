@@ -260,5 +260,109 @@ JOIN contacts c ON md.store_phone = c.phone AND
                    md.store_email = c.email;
 
 
+-- Поставщики
+WITH locations_full as (
+    SELECT
+        l.id,
+        l.address,
+        l.city,
+        l.state,
+        c.name as country
+    FROM locations l
+    JOIN countries c ON l.country_id = c.id
+)
+INSERT INTO suppliers (name, contact_name, contacts_id, location_id)
+SELECT DISTINCT
+    md.supplier_name as name,
+    md.supplier_contact as contact_name,
+    c.id as contacts_id,
+    lf.id as location_id
+FROM mock_data md
+JOIN locations_full lf ON md.supplier_address = lf.address AND
+                          md.supplier_city = lf.city AND
+                          md.supplier_country = lf.country
+JOIN contacts c ON md.supplier_phone = c.phone AND
+                   md.supplier_email = c.email;
+
+
+-- Продажи
+WITH store_contacts as (
+    SELECT 
+        s.id,
+        c.email
+    FROM stores s
+    JOIN contacts c ON s.contacts_id = c.id
+),
+supplier_contacts as (
+    SELECT
+        s.id,
+        c.email
+    FROM suppliers s
+    JOIN contacts c ON s.contacts_id = c.id
+),
+physical_attributes_full as (
+    SELECT
+        ppa.id,
+        ppa.weight,
+        pc.name as color,
+        ps.name as size,
+        pm.name as material
+    FROM product_physical_attributes ppa
+    JOIN product_colors pc ON ppa.color_id = pc.id
+    JOIN product_sizes ps ON ppa.size_id = ps.id
+    JOIN product_materials pm ON ppa.material_id = pm.id
+),
+products_full as (
+    SELECT
+        p.id,
+        p.name,
+        cat.name as category,
+        pcat.name as pet_category,
+        paf.weight,
+        paf.color,
+        paf.size,
+        paf.material,
+        p.price,
+        p.brand,
+        p.description
+    FROM products p
+    JOIN product_categories cat ON p.category_id = cat.id
+    JOIN product_pet_categories pcat ON p.pet_category_id = pcat.id
+    JOIN physical_attributes_full paf ON p.physical_attributes_id = paf.id
+)
+INSERT INTO sales (
+    customer_id,
+    seller_id,
+    product_id,
+    store_id,
+    supplier_id,
+    date,
+    quantity,
+    total_price
+)
+SELECT
+    c.id as customer_id,
+    sel.id as seller_id,
+    prod.id as product_id,
+    stc.id as store_id,
+    supc.id as supplier_id,
+    md.sale_date as date,
+    md.sale_quantity as quantity,
+    md.sale_total_price as total_price
+FROM mock_data md
+JOIN customers c ON md.customer_email = c.email
+JOIN sellers sel ON md.seller_email = sel.email
+JOIN store_contacts stc ON md.store_email = stc.email
+JOIN supplier_contacts supc ON md.supplier_email = supc.email
+JOIN products_full prod ON md.product_name = prod.name AND
+                           md.product_category = prod.category AND
+                           md.pet_category = prod.pet_category AND
+                           md.product_weight = prod.weight AND
+                           md.product_color = prod.color AND
+                           md.product_size = prod.size AND
+                           md.product_material = prod.material AND
+                           md.product_price = prod.price AND
+                           md.product_brand = prod.brand AND
+                           md.product_description = prod.description;
 
 COMMIT;

@@ -48,21 +48,6 @@ WITH pets_full as (
     FROM pets p
     JOIN pet_types pt ON p.type_id = pt.id
     JOIN pet_breeds pb ON p.breed_id = pb.id
-),
-customers_to_insert as (
-    SELECT DISTINCT
-        md.customer_first_name as first_name,
-        md.customer_last_name as last_name,
-        md.customer_age as age,
-        md.customer_email as email, 
-        c.id as country_id,
-        md.customer_postal_code as postal_code,
-        pf.id as pet_id
-    FROM mock_data md
-    JOIN countries c ON md.customer_country = c.name
-    JOIN pets_full pf ON md.customer_pet_name = pf.name AND
-                         md.customer_pet_type = pf.type AND
-                         md.customer_pet_breed = pf.breed
 )
 INSERT INTO customers (
     first_name,
@@ -73,15 +58,20 @@ INSERT INTO customers (
     postal_code,
     pet_id
 )
-SELECT
-    first_name,
-    last_name,
-    age,
-    email,
-    country_id,
-    postal_code,
-    pet_id
-FROM customers_to_insert;
+SELECT DISTINCT
+    md.customer_first_name as first_name,
+    md.customer_last_name as last_name,
+    md.customer_age as age,
+    md.customer_email as email, 
+    c.id as country_id,
+    md.customer_postal_code as postal_code,
+    pf.id as pet_id
+FROM mock_data md
+JOIN countries c ON md.customer_country = c.name
+JOIN pets_full pf ON md.customer_pet_name = pf.name AND
+                     md.customer_pet_type = pf.type AND
+                     md.customer_pet_breed = pf.breed;
+
 
 
 -- Продвавцы
@@ -174,29 +164,6 @@ WITH physical_attributes_full as (
     JOIN product_colors pc ON ppa.color_id = pc.id
     JOIN product_sizes ps ON ppa.size_id = ps.id
     JOIN product_materials pm ON ppa.material_id = pm.id
-), products_to_insert as (
-    SELECT DISTINCT
-        md.product_name as name,
-        pc.id as category_id,
-        ppc.id as pet_category_id,
-        paf.physical_attributes_id,
-        pr.id as review_id,
-        pd.id as dates_id,
-        md.product_price as price,
-        md.product_quantity as quantity,
-        md.product_brand as brand,
-        md.product_description as description
-    FROM mock_data md
-    JOIN product_categories pc ON md.product_category = pc.name
-    JOIN product_pet_categories ppc ON md.pet_category = ppc.name
-    JOIN physical_attributes_full paf ON md.product_weight = paf.weight AND
-                                         md.product_color = paf.color AND
-                                         md.product_size = paf.size AND
-                                         md.product_material = paf.material
-    JOIN product_reviews pr ON md.product_rating = pr.rating AND
-                               md.product_reviews = pr.reviews
-    JOIN product_dates pd ON md.product_release_date = pd.release_date AND
-                             md.product_expiry_date = pd.expiry_date
 )
 INSERT INTO products (
     name,
@@ -210,18 +177,29 @@ INSERT INTO products (
     brand,
     description
 )
-SELECT
-    name,
-    category_id,
-    pet_category_id,
-    physical_attributes_id,
-    review_id,
-    dates_id,
-    price,
-    quantity,
-    brand,
-    description
-FROM products_to_insert;
+SELECT DISTINCT
+    md.product_name as name,
+    pc.id as category_id,
+    ppc.id as pet_category_id,
+    paf.physical_attributes_id,
+    pr.id as review_id,
+    pd.id as dates_id,
+    md.product_price as price,
+    md.product_quantity as quantity,
+    md.product_brand as brand,
+    md.product_description as description
+FROM mock_data md
+JOIN product_categories pc ON md.product_category = pc.name
+JOIN product_pet_categories ppc ON md.pet_category = ppc.name
+JOIN physical_attributes_full paf ON md.product_weight = paf.weight AND
+                                     md.product_color = paf.color AND
+                                     md.product_size = paf.size AND
+                                     md.product_material = paf.material
+JOIN product_reviews pr ON md.product_rating = pr.rating AND
+                           md.product_reviews = pr.reviews
+JOIN product_dates pd ON md.product_release_date = pd.release_date AND
+                         md.product_expiry_date = pd.expiry_date;
+
 
 
 -- Контакты

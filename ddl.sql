@@ -2,7 +2,7 @@ BEGIN TRANSACTION;
 
 -- Таблицы, свзяанные с покупателями
 
-CREATE TABLE customer_countries (
+CREATE TABLE countries (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50)
 );
@@ -30,7 +30,7 @@ CREATE TABLE customers (
     last_name VARCHAR(50),
     age INTEGER,
     email VARCHAR(50),
-    country_id BIGINT REFERENCES customer_countries(id),
+    country_id BIGINT REFERENCES countries(id),
     postal_code VARCHAR(50),
     pet_id BIGINT REFERENCES pets(id)
 );
@@ -38,17 +38,12 @@ CREATE TABLE customers (
 
 -- Таблицы, связанные с продавцами
 
-CREATE TABLE seller_countries (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50)
-);
-
 CREATE TABLE sellers (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(50),
     last_name VARCHAR(50),
     email VARCHAR(50),
-    country_id BIGINT REFERENCES seller_countries(id),
+    country_id BIGINT REFERENCES countries(id),
     postal_code VARCHAR(50)
 );
 
@@ -117,20 +112,15 @@ CREATE TABLE products (
 
 -- Таблицы, связанные с магазинами
 
-CREATE TABLE store_countries (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50)
-);
-
-CREATE TABLE store_locations (
+CREATE TABLE locations (
     id SERIAL PRIMARY KEY,
     address VARCHAR(50),
     city VARCHAR(50),
     state VARCHAR(50),
-    country_id BIGINT REFERENCES store_countries(id)
+    country_id BIGINT REFERENCES countries(id)
 );
 
-CREATE TABLE store_contacts (
+CREATE TABLE contacts (
     id SERIAL PRIMARY KEY,
     phone VARCHAR(50),
     email VARCHAR(50)
@@ -139,43 +129,26 @@ CREATE TABLE store_contacts (
 CREATE TABLE stores (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50),
-    location_id BIGINT REFERENCES store_locations(id),
-    contacts_id BIGINT REFERENCES store_contacts(id)
+    location_id BIGINT REFERENCES locations(id),
+    contacts_id BIGINT REFERENCES contacts(id)
 );
 
 
 -- Таблицы, связанные с поставщиками
-CREATE TABLE supplier_contacts (
-    id SERIAL PRIMARY KEY,
-    phone VARCHAR(50),
-    email VARCHAR(50)
-);
-
-CREATE TABLE supplier_countries (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50)
-);
-
-CREATE TABLE supplier_locations (
-    id SERIAL PRIMARY KEY,
-    address VARCHAR(50),
-    city VARCHAR(50),
-    country_id BIGINT REFERENCES supplier_countries(id)
-);
 
 CREATE TABLE suppliers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50),
     contact_name VARCHAR(50),
-    contacts_id BIGINT REFERENCES supplier_contacts(id),
-    location_id BIGINT REFERENCES supplier_locations(id)
+    contacts_id BIGINT REFERENCES contacts(id),
+    location_id BIGINT REFERENCES locations(id)
 );
 
 
 -- Финальная таблицы с фактами
 
 CREATE TABLE sales (
-    id SERIAL PRIMARY KEY
+    id SERIAL PRIMARY KEY,
     customer_id BIGINT REFERENCES customers(id),
     seller_id BIGINT REFERENCES sellers(id),
     product_id BIGINT REFERENCES products(id),

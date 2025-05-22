@@ -104,7 +104,7 @@ CREATE TABLE products (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50),
     category_id BIGINT REFERENCES product_categories(id),
-    pet_category BIGINT REFERENCES product_pet_categories(id),
+    pet_category_id BIGINT REFERENCES product_pet_categories(id),
     physical_attributes_id BIGINT REFERENCES product_physical_attributes(id),
     review_id BIGINT REFERENCES product_reviews(id),
     dates_id BIGINT REFERENCES product_dates(id),
